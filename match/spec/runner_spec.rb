@@ -35,6 +35,8 @@ describe Match do
           config = FastlaneCore::Configuration.create(Match::Options.available_options, values)
           repo_dir = Dir.mktmpdir
           cert_path = File.join(repo_dir, "something.cer")
+          File.copy_stream("./match/spec/fixtures/existing/certs/distribution/E7P4EE896K.cer", cert_path)
+          Match::Encryption::OpenSSL.encrypt_specific_file(path: cert_path, password: ENV["MATCH_PASSWORD"])
           profile_path = "./match/spec/fixtures/test.mobileprovision"
           keychain_path = FastlaneCore::Helper.keychain_path("login.keychain") # can be .keychain or .keychain-db
           destination = File.expand_path("~/Library/MobileDevice/Provisioning Profiles/98264c6b-5151-4349-8d0f-66691e48ae35.mobileprovision")
@@ -80,6 +82,7 @@ describe Match do
           expect(Match::Generator).to receive(:generate_provisioning_profile).with(params: config,
                                                                                 prov_type: :appstore,
                                                                            certificate_id: "something",
+                                                                           certificate_serial_number: "7912846BD5AC5DBE75F6E932824F1458",
                                                                            app_identifier: values[:app_identifier],
                                                                                     force: false,
                                                                        working_directory: fake_storage.working_directory).and_return(profile_path)
@@ -193,12 +196,12 @@ describe Match do
           Match::Runner.new.run(config)
 
           expect(ENV[Match::Utils.environment_variable_name(app_identifier: "tools.fastlane.app",
-                                                            type: "appstore")]).to eql('736590c3-dfe8-4c25-b2eb-2404b8e65fb8')
+                                                            type: "appstore")]).to eql('a0b45501-0c52-41cb-b52e-124edf937135')
           expect(ENV[Match::Utils.environment_variable_name_team_id(app_identifier: "tools.fastlane.app",
-                                                                    type: "appstore")]).to eql('439BBM9367')
+                                                                    type: "appstore")]).to eql('VQVYM88YJ2')
           expect(ENV[Match::Utils.environment_variable_name_profile_name(app_identifier: "tools.fastlane.app",
-                                                                         type: "appstore")]).to eql('match AppStore tools.fastlane.app 1449198835')
-          profile_path = File.expand_path('~/Library/MobileDevice/Provisioning Profiles/736590c3-dfe8-4c25-b2eb-2404b8e65fb8.mobileprovision')
+                                                                         type: "appstore")]).to eql('Jigx Test AppStore')
+          profile_path = File.expand_path('~/Library/MobileDevice/Provisioning Profiles/a0b45501-0c52-41cb-b52e-124edf937135.mobileprovision')
           expect(ENV[Match::Utils.environment_variable_name_profile_path(app_identifier: "tools.fastlane.app",
                                                                          type: "appstore")]).to eql(profile_path)
           expect(ENV[Match::Utils.environment_variable_name_certificate_name(app_identifier: "tools.fastlane.app",
@@ -288,6 +291,8 @@ describe Match do
           config = FastlaneCore::Configuration.create(Match::Options.available_options, values)
           repo_dir = Dir.mktmpdir
           cert_path = File.join(repo_dir, "something.cer")
+          File.copy_stream("./match/spec/fixtures/existing/certs/distribution/E7P4EE896K.cer", cert_path)
+          Match::Encryption::OpenSSL.encrypt_specific_file(path: cert_path, password: ENV["MATCH_PASSWORD"])
           keychain_path = FastlaneCore::Helper.keychain_path("login.keychain") # can be .keychain or .keychain-db
           destination = File.expand_path("~/Library/MobileDevice/Provisioning Profiles/98264c6b-5151-4349-8d0f-66691e48ae35.mobileprovision")
 

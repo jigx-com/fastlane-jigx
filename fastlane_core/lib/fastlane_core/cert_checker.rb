@@ -207,5 +207,16 @@ module FastlaneCore
       UI.error(error)
       UI.user_error!("Error parsing certificate '#{path}'")
     end
+
+    def self.certificate_key_match?(cert_path, key_path)
+      # Use openssl class
+      cert_obj = OpenSSL::X509::Certificate.new(File.read(cert_path))
+      begin
+        key_obj = OpenSSL::PKey::RSA.new(File.read(key_path))
+        rescue OpenSSL::PKey::RSAError
+          key_obj = OpenSSL::PKCS12.new(File.read(key_path)).key
+      end
+      return cert_obj.check_private_key(key_obj)
+    end
   end
 end
