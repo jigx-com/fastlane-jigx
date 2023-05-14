@@ -25,6 +25,7 @@ module Match
       attr_reader :team_name
       attr_reader :api_key_path
       attr_reader :api_key
+      attr_reader :skip_spaceship_ensure
 
       # Managed values
       attr_accessor :gc_storage
@@ -35,6 +36,19 @@ module Match
           UI.important("you use Google Cloud Storage. You can remove the `git_url`")
           UI.important("from your Matchfile and Fastfile")
           UI.message("The above is just a warning, fastlane will continue as usual now...")
+        end
+
+        skip_spaceship_ensure = params[:skip_spaceship_ensure]
+        if skip_spaceship_ensure
+          if api_key || api_key_path || username || team_name
+            UI.warning!("You set `skip_spaceship_ensure` to true, but you provided (one or more) other parameters
+                         (api_key, api_key_path, username, team_name) which are not needed since we will not use the Apple API.")
+          end
+
+          if team_id.nil?
+            UI.user_error!("You set `skip_spaceship_ensure` to true, but you didn't provide a `team_id`. 
+                            This is needed because there is no other way to get the team id since we don't use the Apple API.")
+          end
         end
 
         return self.new(
@@ -49,7 +63,8 @@ module Match
           team_name: params[:team_name],
           api_key_path: params[:api_key_path],
           api_key: params[:api_key],
-          skip_google_cloud_account_confirmation: params[:skip_google_cloud_account_confirmation]
+          skip_google_cloud_account_confirmation: params[:skip_google_cloud_account_confirmation],
+          skip_spaceship_ensure: skip_spaceship_ensure
         )
       end
 
@@ -118,8 +133,12 @@ module Match
         else
           UI.user_error!("The `team_id` option is required. fastlane cannot automatically determine portal team id via the App Store Connect API (yet)") if self.team_id.to_s.empty?
 
-          spaceship = SpaceshipEnsure.new(self.username, self.team_id, self.team_name, self.api_token)
-          return spaceship.team_id
+          if skip_spaceship_ensure
+            return self.team_id
+          else
+            spaceship = SpaceshipEnsure.new(self.username, self.team_id, self.team_name, self.api_token)
+            return spaceship.team_id
+          end
         end
       end
 
