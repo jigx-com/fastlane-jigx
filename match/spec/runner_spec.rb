@@ -40,7 +40,7 @@ describe Match do
             keychain_name: "login.keychain",
             working_directory: repo_dir
           )
-          openssl.encrypt_files(password: ENV["MATCH_PASSWORD"])
+          openssl.encrypt_files(password: ENV.fetch("MATCH_PASSWORD", nil))
           profile_path = "./match/spec/fixtures/test.mobileprovision"
           keychain_path = FastlaneCore::Helper.keychain_path("login.keychain") # can be .keychain or .keychain-db
           destination = File.expand_path("~/Library/MobileDevice/Provisioning Profiles/98264c6b-5151-4349-8d0f-66691e48ae35.mobileprovision")
@@ -71,6 +71,12 @@ describe Match do
             s3_object_prefix: nil,
             gitlab_project: nil,
             gitlab_host: 'https://gitlab.com',
+            aws_secrets_manager_access_key: nil,
+            aws_secrets_manager_force_delete_without_recovery: nil,
+            aws_secrets_manager_prefix: nil,
+            aws_secrets_manager_recovery_window_days: nil,
+            aws_secrets_manager_region: nil,
+            aws_secrets_manager_secret_access_key: nil,
             readonly: false,
             username: values[:username],
             team_id: nil,
@@ -85,12 +91,12 @@ describe Match do
           allow(fake_storage).to receive(:prefixed_working_directory).and_return(repo_dir)
           expect(Match::Generator).to receive(:generate_certificate).with(config, :distribution, fake_storage.working_directory, specific_cert_type: nil).and_return(cert_path)
           expect(Match::Generator).to receive(:generate_provisioning_profile).with(params: config,
-                                                                                prov_type: :appstore,
-                                                                           certificate_id: "something",
-                                                                           certificate_serial_number: "665C0BF3BA7BFB7EFBC4789806719C8A",
-                                                                           app_identifier: values[:app_identifier],
-                                                                                    force: false,
-                                                                       working_directory: fake_storage.working_directory).and_return(profile_path)
+                                                                                   prov_type: :appstore,
+                                                                                   certificate_id: "something",
+                                                                                   certificate_serial_number: "665C0BF3BA7BFB7EFBC4789806719C8A",
+                                                                                   app_identifier: values[:app_identifier],
+                                                                                   force: false,
+                                                                                   working_directory: fake_storage.working_directory).and_return(profile_path)
           expect(FastlaneCore::ProvisioningProfile).to receive(:install).with(profile_path, keychain_path).and_return(destination)
           expect(fake_storage).to receive(:save_changes!).with(
             files_to_commit: [
@@ -110,17 +116,17 @@ describe Match do
 
           Match::Runner.new.run(config)
 
-          expect(ENV[Match::Utils.environment_variable_name(app_identifier: "tools.fastlane.app",
-                                                            type: "appstore")]).to eql('98264c6b-5151-4349-8d0f-66691e48ae35')
-          expect(ENV[Match::Utils.environment_variable_name_team_id(app_identifier: "tools.fastlane.app",
-                                                                    type: "appstore")]).to eql('439BBM9367')
-          expect(ENV[Match::Utils.environment_variable_name_profile_name(app_identifier: "tools.fastlane.app",
-                                                                         type: "appstore")]).to eql('tools.fastlane.app AppStore')
+          expect(ENV.fetch(Match::Utils.environment_variable_name(app_identifier: "tools.fastlane.app",
+                                                                  type: "appstore"), nil)).to eql('98264c6b-5151-4349-8d0f-66691e48ae35')
+          expect(ENV.fetch(Match::Utils.environment_variable_name_team_id(app_identifier: "tools.fastlane.app",
+                                                                          type: "appstore"), nil)).to eql('439BBM9367')
+          expect(ENV.fetch(Match::Utils.environment_variable_name_profile_name(app_identifier: "tools.fastlane.app",
+                                                                               type: "appstore"), nil)).to eql('tools.fastlane.app AppStore')
           profile_path = File.expand_path('~/Library/MobileDevice/Provisioning Profiles/98264c6b-5151-4349-8d0f-66691e48ae35.mobileprovision')
-          expect(ENV[Match::Utils.environment_variable_name_profile_path(app_identifier: "tools.fastlane.app",
-                                                                         type: "appstore")]).to eql(profile_path)
-          expect(ENV[Match::Utils.environment_variable_name_certificate_name(app_identifier: "tools.fastlane.app",
-                                                                             type: "appstore")]).to eql("fastlane certificate name")
+          expect(ENV.fetch(Match::Utils.environment_variable_name_profile_path(app_identifier: "tools.fastlane.app",
+                                                                               type: "appstore"), nil)).to eql(profile_path)
+          expect(ENV.fetch(Match::Utils.environment_variable_name_certificate_name(app_identifier: "tools.fastlane.app",
+                                                                                   type: "appstore"), nil)).to eql("fastlane certificate name")
         end
 
         it "uses existing certificates and profiles if they exist", requires_security: true do
@@ -165,6 +171,12 @@ describe Match do
             s3_object_prefix: nil,
             gitlab_project: nil,
             gitlab_host: 'https://gitlab.com',
+            aws_secrets_manager_access_key: nil,
+            aws_secrets_manager_force_delete_without_recovery: nil,
+            aws_secrets_manager_prefix: nil,
+            aws_secrets_manager_recovery_window_days: nil,
+            aws_secrets_manager_region: nil,
+            aws_secrets_manager_secret_access_key: nil,
             readonly: false,
             username: values[:username],
             team_id: nil,
@@ -205,17 +217,17 @@ describe Match do
 
           Match::Runner.new.run(config)
 
-          expect(ENV[Match::Utils.environment_variable_name(app_identifier: "tools.fastlane.app",
-                                                            type: "appstore")]).to eql('c3e20987-ffea-4d11-b037-e8bf0a102561')
-          expect(ENV[Match::Utils.environment_variable_name_team_id(app_identifier: "tools.fastlane.app",
-                                                                    type: "appstore")]).to eql('VQVYM88YJ2')
-          expect(ENV[Match::Utils.environment_variable_name_profile_name(app_identifier: "tools.fastlane.app",
-                                                                         type: "appstore")]).to eql('Fastlane PR Unit Tests')
+          expect(ENV.fetch(Match::Utils.environment_variable_name(app_identifier: "tools.fastlane.app",
+                                                                  type: "appstore"), nil)).to eql('c3e20987-ffea-4d11-b037-e8bf0a102561')
+          expect(ENV.fetch(Match::Utils.environment_variable_name_team_id(app_identifier: "tools.fastlane.app",
+                                                                          type: "appstore"), nil)).to eql('VQVYM88YJ2')
+          expect(ENV.fetch(Match::Utils.environment_variable_name_profile_name(app_identifier: "tools.fastlane.app",
+                                                                               type: "appstore"), nil)).to eql('Fastlane PR Unit Tests')
           profile_path = File.expand_path('~/Library/MobileDevice/Provisioning Profiles/c3e20987-ffea-4d11-b037-e8bf0a102561.mobileprovision')
-          expect(ENV[Match::Utils.environment_variable_name_profile_path(app_identifier: "tools.fastlane.app",
-                                                                         type: "appstore")]).to eql(profile_path)
-          expect(ENV[Match::Utils.environment_variable_name_certificate_name(app_identifier: "tools.fastlane.app",
-                                                                             type: "appstore")]).to eql("fastlane certificate name")
+          expect(ENV.fetch(Match::Utils.environment_variable_name_profile_path(app_identifier: "tools.fastlane.app",
+                                                                               type: "appstore"), nil)).to eql(profile_path)
+          expect(ENV.fetch(Match::Utils.environment_variable_name_certificate_name(app_identifier: "tools.fastlane.app",
+                                                                                   type: "appstore"), nil)).to eql("fastlane certificate name")
         end
 
         it "fails because of an outdated certificate", requires_security: true do
@@ -260,6 +272,12 @@ describe Match do
             s3_object_prefix: nil,
             gitlab_project: nil,
             gitlab_host: 'https://gitlab.com',
+            aws_secrets_manager_access_key: nil,
+            aws_secrets_manager_force_delete_without_recovery: nil,
+            aws_secrets_manager_prefix: nil,
+            aws_secrets_manager_recovery_window_days: nil,
+            aws_secrets_manager_region: nil,
+            aws_secrets_manager_secret_access_key: nil,
             readonly: false,
             username: values[:username],
             team_id: nil,
@@ -309,7 +327,7 @@ describe Match do
             keychain_name: "login.keychain",
             working_directory: repo_dir
           )
-          openssl.encrypt_files(password: ENV["MATCH_PASSWORD"])
+          openssl.encrypt_files(password: ENV.fetch("MATCH_PASSWORD", nil))
           keychain_path = FastlaneCore::Helper.keychain_path("login.keychain") # can be .keychain or .keychain-db
           destination = File.expand_path("~/Library/MobileDevice/Provisioning Profiles/98264c6b-5151-4349-8d0f-66691e48ae35.mobileprovision")
 
@@ -339,6 +357,12 @@ describe Match do
             s3_object_prefix: nil,
             gitlab_project: nil,
             gitlab_host: 'https://gitlab.com',
+            aws_secrets_manager_access_key: nil,
+            aws_secrets_manager_force_delete_without_recovery: nil,
+            aws_secrets_manager_prefix: nil,
+            aws_secrets_manager_recovery_window_days: nil,
+            aws_secrets_manager_region: nil,
+            aws_secrets_manager_secret_access_key: nil,
             readonly: false,
             username: values[:username],
             team_id: nil,
@@ -443,7 +467,7 @@ describe Match do
           keychain_name: "login.keychain",
           working_directory: repo_dir
         )
-        openssl.encrypt_files(password: ENV["MATCH_PASSWORD"])
+        openssl.encrypt_files(password: ENV.fetch("MATCH_PASSWORD", nil))
         profile_path = "./match/spec/fixtures/test.mobileprovision"
         keychain_path = FastlaneCore::Helper.keychain_path("login.keychain") # can be .keychain or .keychain-db
         destination = File.expand_path("~/Library/MobileDevice/Provisioning Profiles/98264c6b-5151-4349-8d0f-66691e48ae35.mobileprovision")
