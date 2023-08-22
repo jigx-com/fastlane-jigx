@@ -14,6 +14,8 @@ module Match
       p12_path = ensure_valid_file_path(p12_path, "Private key", ".p12")
       profile_path = ensure_valid_file_path(profile_path, "Provisioning profile", ".mobileprovision or .provisionprofile", optional: true)
 
+      should_skip_certificate_matching = params[:skip_certificate_matching]
+
       # Storage
       storage = Storage.for_mode(params[:storage_mode], {
         git_url: params[:git_url],
@@ -50,7 +52,8 @@ module Match
         aws_secrets_manager_force_delete_without_recovery: params[:aws_secrets_manager_force_delete_without_recovery],
         aws_secrets_manager_recovery_window_days: params[:aws_secrets_manager_recovery_window_days],
         aws_secrets_manager_access_key: params[:aws_secrets_manager_access_key],
-        aws_secrets_manager_secret_access_key: params[:aws_secrets_manager_secret_access_key]
+        aws_secrets_manager_secret_access_key: params[:aws_secrets_manager_secret_access_key],
+        skip_spaceship_ensure: should_skip_certificate_matching,
       })
       storage.download
 
@@ -99,7 +102,6 @@ module Match
       output_dir_certs = File.join(storage.prefixed_working_directory, "certs", cert_type.to_s)
       output_dir_profiles = File.join(storage.prefixed_working_directory, "profiles", prov_type.to_s)
 
-      should_skip_certificate_matching = params[:skip_certificate_matching]
       # In case there is no access to Apple Developer portal but we have the certificates, keys and profiles
       if should_skip_certificate_matching
         cert_name = File.basename(cert_path, ".*")
@@ -164,7 +166,7 @@ module Match
       file_path ||= UI.input("#{file_description} (#{file_extension}) path#{optional_file_message}:")
 
       file_path = File.absolute_path(file_path) unless file_path == ""
-      file_path = File.exist?(file_path) ? file_path : nil
+      file_path = nil unless File.exist?(file_path)
       UI.user_error!("#{file_description} does not exist at path: #{file_path}") unless !file_path.nil? || optional
       file_path
     end

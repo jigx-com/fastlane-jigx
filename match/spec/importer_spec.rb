@@ -158,7 +158,8 @@ describe Match do
         aws_secrets_manager_force_delete_without_recovery: nil,
         aws_secrets_manager_recovery_window_days: nil,
         aws_secrets_manager_access_key: nil,
-        aws_secrets_manager_secret_access_key: nil
+        aws_secrets_manager_secret_access_key: nil,
+        skip_spaceship_ensure: false
       ).and_return(fake_storage)
 
       expect(fake_storage).to receive(:download).and_return(nil)

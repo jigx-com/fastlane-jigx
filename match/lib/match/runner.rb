@@ -69,6 +69,7 @@ module Match
         aws_secrets_manager_recovery_window_days: params[:aws_secrets_manager_recovery_window_days],
         aws_secrets_manager_access_key: params[:aws_secrets_manager_access_key],
         aws_secrets_manager_secret_access_key: params[:aws_secrets_manager_secret_access_key],
+        skip_spaceship_ensure: params[:skip_certificate_matching],
       })
       storage.download
 
