@@ -350,8 +350,8 @@ module Match
                                                                               platform: params[:platform]),
                              cert_info["Common Name"])
       Utils.fill_environment(Utils.environment_variable_name_certificate_serial_number(app_identifier: app_identifier,
-                                                                                             type: prov_type,
-                                                                                             platform: params[:platform]),
+                                                                                       type: prov_type,
+                                                                                       platform: params[:platform]),
                              cert_info["Serial Number"])
 
       Utils.fill_environment(Utils.environment_variable_name_profile_name(app_identifier: app_identifier,
