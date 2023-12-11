@@ -61,6 +61,8 @@ module Match
         aws_secrets_manager_region: params[:aws_secrets_manager_region],
         aws_secrets_manager_prefix: params[:aws_secrets_manager_prefix],
         aws_secrets_manager_path_separator: params[:aws_secrets_manager_path_separator],
+        aws_secrets_manager_tag_name: params[:aws_secrets_manager_tag_name],
+        aws_secrets_manager_tag_value: params[:aws_secrets_manager_tag_value],
         aws_secrets_manager_force_delete_without_recovery: params[:aws_secrets_manager_force_delete_without_recovery],
         aws_secrets_manager_recovery_window_days: params[:aws_secrets_manager_recovery_window_days],
         aws_secrets_manager_access_key: params[:aws_secrets_manager_access_key],

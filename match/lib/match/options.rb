@@ -247,6 +247,14 @@ module Match
                                      env_name: "AWS_SECRETS_MANAGER_PATH_SEPARATOR",
                                      description: "Character to be used as a slash replacement in the secret name",
                                      optional: true),
+        FastlaneCore::ConfigItem.new(key: :aws_secrets_manager_tag_name,
+                                     env_name: "MATCH_AWS_SECRETS_MANAGER_TAG_NAME",
+                                     description: "Tag name to be used for filtering secrets in AWS Secrets Manager.",
+                                     optional: true),
+        FastlaneCore::ConfigItem.new(key: :aws_secrets_manager_tag_value,
+                                     env_name: "MATCH_AWS_SECRETS_MANAGER_TAG_VALUE",
+                                     description: "Tag value to be used for filtering secrets in AWS Secrets Manager. If not specified, all secrets with the specified tag name will be returned.",
+                                     optional: true),
         FastlaneCore::ConfigItem.new(key: :aws_secrets_manager_force_delete_without_recovery,
                                      env_name: "MATCH_AWS_SECRETS_MANAGER_FORCE_DELETE_WITHOUT_RECOVERY",
                                      description: "Force delete the secrets without recovery",
@@ -263,7 +271,6 @@ module Match
                                      env_name: "MATCH_AWS_SECRETS_MANAGER_SECRET_ACCESS_KEY",
                                      description: "AWS Secrets Manager secret access key",
                                      optional: true),
-
         # Keychain
         FastlaneCore::ConfigItem.new(key: :keychain_name,
                                      short_option: "-s",

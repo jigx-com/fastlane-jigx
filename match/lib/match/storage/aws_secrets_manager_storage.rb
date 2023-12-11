@@ -29,6 +29,8 @@ module Match
         aws_secrets_manager_region = params[:aws_secrets_manager_region]
         aws_secrets_manager_prefix = params[:aws_secrets_manager_prefix]
         aws_secrets_manager_path_separator = params[:aws_secrets_manager_path_separator]
+        aws_secrets_manager_tag_name = params[:aws_secrets_manager_tag_name]
+        aws_secrets_manager_tag_value = params[:aws_secrets_manager_tag_value]
         aws_secrets_manager_access_key = params[:aws_secrets_manager_access_key]
         aws_secrets_manager_secret_access_key = params[:aws_secrets_manager_secret_access_key]
         delete_without_recovery = params[:aws_secrets_manager_force_delete_without_recovery]
@@ -47,7 +49,9 @@ module Match
         return self.new(
           aws_secrets_manager_region: aws_secrets_manager_region,
           aws_secrets_manager_prefix: aws_secrets_manager_prefix,
-          aws_secrets_manager_path_separator: params[:aws_secrets_manager_path_separator],
+          aws_secrets_manager_path_separator: aws_secrets_manager_path_separator,
+          aws_secrets_manager_tag_name: aws_secrets_manager_tag_name,
+          aws_secrets_manager_tag_value: aws_secrets_manager_tag_value,
           delete_without_recovery: delete_without_recovery,
           recovery_window_days: recovery_window_days,
           username: params[:username],
@@ -64,6 +68,8 @@ module Match
       def initialize(aws_secrets_manager_region: nil,
                      aws_secrets_manager_prefix: nil,
                      aws_secrets_manager_path_separator: nil,
+                     aws_secrets_manager_tag_name: nil,
+                     aws_secrets_manager_tag_value: nil,
                      delete_without_recovery: nil,
                      recovery_window_days: nil,
                      username: nil,
@@ -74,8 +80,10 @@ module Match
                      aws_secrets_manager_secret_access_key: nil,
                      api_key_path: nil,
                      api_key: nil)
-        @prefix = aws_secrets_manager_prefix.to_s
-        @path_separator = aws_secrets_manager_path_separator.to_s
+        @prefix = aws_secrets_manager_prefix&.to_s
+        @path_separator = aws_secrets_manager_path_separator&.to_s
+        @tag_name = aws_secrets_manager_tag_name&.to_s
+        @tag_value = aws_secrets_manager_tag_value&.to_s
         @delete_without_recovery = delete_without_recovery
         @recovery_window_days = recovery_window_days
         @username = username
@@ -123,6 +131,33 @@ module Match
         secret_list = []
         next_token = nil
         loop do
+          filters = [
+            {
+              key: "name",
+              values: ["#{prefix}#{!currently_used_team_id.nil? ? currently_used_team_id.to_s : ''}"]
+            }
+          ]
+          if @tag_name && @tag_value
+            filters << {
+              key: "tag-key",
+              values: [@tag_name]
+            }
+            filters << {
+              key: "tag-value",
+              values: [@tag_value]
+            }
+          elsif @tag_name
+            filters << {
+              key: "tag-key",
+              values: [@tag_name]
+            }
+          elsif @tag_value
+            filters << {
+              key: "tag-value",
+              values: [@tag_value]
+            }
+          end
+
           response = aws_sm_client.list_secrets({
             max_results: 100,
             next_token: next_token,
