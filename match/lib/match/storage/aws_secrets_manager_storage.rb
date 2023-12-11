@@ -161,12 +161,7 @@ module Match
           response = aws_sm_client.list_secrets({
             max_results: 100,
             next_token: next_token,
-            filters: [
-              {
-                key: "name",
-                values: ["#{prefix}#{!currently_used_team_id.nil? ? currently_used_team_id.to_s : ''}"]
-              }
-            ]
+            filters: filters
           }.compact)
           secret_list += response.secret_list
           next_token = response.next_token
