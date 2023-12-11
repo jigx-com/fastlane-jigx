@@ -177,7 +177,7 @@ module Match
           decoded_secret = Zlib::Inflate.inflate(Base64.decode64(retrieved_secret.secret_string))
           stripped_secret_name = strip_secrets_manager_object_prefix(secret.name)
           decoded_secret_name = decode_file_name(stripped_secret_name)
-          download_path = File.join(self.working_directory, stripped_secret_name)
+          download_path = File.join(self.working_directory, decoded_secret_name)
           FileUtils.mkdir_p(File.expand_path("..", download_path))
           File.write(download_path, decoded_secret)
         end
