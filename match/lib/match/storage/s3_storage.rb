@@ -22,6 +22,7 @@ module Match
       attr_reader :api_key_path
       attr_reader :api_key
       attr_reader :skip_spaceship_ensure
+      attr_reader :bundle_id_filter
 
       def self.configure(params)
         s3_region = params[:s3_region]
@@ -62,7 +63,8 @@ module Match
           team_name: params[:team_name],
           api_key_path: params[:api_key_path],
           api_key: params[:api_key],
-          skip_spaceship_ensure: skip_spaceship_ensure
+          skip_spaceship_ensure: skip_spaceship_ensure,
+          bundle_id_filter: params[:bundle_id_filter]
         )
       end
 
@@ -77,7 +79,8 @@ module Match
                      team_name: nil,
                      api_key_path: nil,
                      api_key: nil,
-                     skip_spaceship_ensure: nil)
+                     skip_spaceship_ensure: nil,
+                     bundle_id_filter: nil)
         @s3_bucket = s3_bucket
         @s3_region = s3_region
         @s3_client = Fastlane::Helper::S3ClientHelper.new(access_key: s3_access_key, secret_access_key: s3_secret_access_key, region: s3_region)
@@ -89,6 +92,7 @@ module Match
         @api_key_path = api_key_path
         @api_key = api_key
         @skip_spaceship_ensure = skip_spaceship_ensure
+        @bundle_id_filter = bundle_id_filter
       end
 
       # To make debugging easier, we have a custom exception here
@@ -119,6 +123,18 @@ module Match
         self.working_directory = Dir.mktmpdir
 
         s3_client.find_bucket!(s3_bucket).objects(prefix: s3_object_prefix).each do |object|
+          unless object.key.include?(team_id) || object.key == "match_version.txt" || object.key == "build-number-mobile-app.txt"
+            UI.verbose("Skipping file '#{object.key}' as it doesn't belong to the team '#{team_id}'")
+            next
+          end
+          # filter by bundle_id_filter if the key doesn't contain .cer or .p12
+          if bundle_id_filter && !object.key.end_with?(".cer", ".p12")
+            unless object.key.include?(bundle_id_filter)
+              UI.verbose("Skipping file '#{object.key}' as it doesn't contain the bundle id filter '#{bundle_id}'")
+              next
+            end
+          end
+
           file_path = strip_s3_object_prefix(object.key) # :s3_object_prefix:team_id/path/to/file
 
           # strip s3_prefix from file_path
@@ -127,7 +143,6 @@ module Match
           FileUtils.mkdir_p(File.expand_path("..", download_path))
           UI.verbose("Downloading file from S3 '#{file_path}' on bucket #{self.s3_bucket}")
 
-          next unless object.key.include?(team_id)
 
           object.download_file(download_path)
         end
