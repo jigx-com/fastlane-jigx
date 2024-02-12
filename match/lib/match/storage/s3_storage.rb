@@ -129,9 +129,17 @@ module Match
           end
           # filter by bundle_id_filter if the key doesn't contain .cer or .p12
           if bundle_id_filter && !object.key.end_with?(".cer", ".p12")
-            unless object.key.include?(bundle_id_filter)
-              UI.verbose("Skipping file '#{object.key}' as it doesn't contain the bundle id filter '#{bundle_id}'")
-              next
+            # if bundle_id_filter is an array, check if any of the bundle id matches
+            if bundle_id_filter.is_a?(Array)
+              unless bundle_id_filter.any? { |filter| object.key.include?(filter) }
+                UI.verbose("Skipping file '#{object.key}' as it doesn't contain the bundle id filter '#{bundle_id_filter}'")
+                next
+              end
+            else
+              unless object.key.include?(bundle_id_filter)
+                UI.verbose("Skipping file '#{object.key}' as it doesn't contain the bundle id filter '#{bundle_id}'")
+                next
+              end
             end
           end
 
