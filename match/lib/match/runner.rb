@@ -73,6 +73,7 @@ module Match
         aws_secrets_manager_access_key: params[:aws_secrets_manager_access_key],
         aws_secrets_manager_secret_access_key: params[:aws_secrets_manager_secret_access_key],
         skip_spaceship_ensure: params[:skip_certificate_matching],
+        bundle_id_filter: params[:app_identifier]
       })
       storage.download
 
