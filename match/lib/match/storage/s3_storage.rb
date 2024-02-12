@@ -127,6 +127,8 @@ module Match
           FileUtils.mkdir_p(File.expand_path("..", download_path))
           UI.verbose("Downloading file from S3 '#{file_path}' on bucket #{self.s3_bucket}")
 
+          next unless object.key.include?(team_id)
+
           object.download_file(download_path)
         end
         UI.verbose("Successfully downloaded files from S3 to #{self.working_directory}")
