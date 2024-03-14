@@ -4,8 +4,13 @@ require 'security'
 
 module FastlaneCore
   class KeychainImporter
-    def self.import_file(path, keychain_path, keychain_password: nil, certificate_password: "", skip_set_partition_list: false, output: FastlaneCore::Globals.verbose?)
+    def self.import_file(path, keychain_path, keychain_password: nil, certificate_password: "1234", skip_set_partition_list: false, output: FastlaneCore::Globals.verbose?)
       UI.user_error!("Could not find file '#{path}'") unless File.exist?(path)
+
+      keychain_special_file_path = File.join(File.dirname(path), "#{File.basename(path, ".p12")}_keychain.p12")
+      if File.extname(path) == ".p12" && File.exist?(keychain_special_file_path)
+        path = keychain_special_file_path
+      end
 
       password_part = " -P #{certificate_password.shellescape}"
 

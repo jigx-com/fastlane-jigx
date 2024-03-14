@@ -163,45 +163,44 @@ module Match
         end
       end
 
-      
-      def legacy_certificate_check(certificate_path, certificate_password)
-        stdout, stderr, status = Open3.capture3("openssl pkcs12 -in #{certificate_path} -passin pass:#{certificate_password} -noout")
-        if stderr.include?("error:0308010C:digital envelope routines:inner_evp_generic_fetch:unsupported")
+      def legacy_certificate_check(certificate_path)
+        stdout, stderr, status = Open3.capture3("openssl pkcs12 -in #{certificate_path} -noout -passin pass:")
+        if stderr.include?('error:0308010C:digital envelope routines:inner_evp_generic_fetch:unsupported')
           true
         else
           false
         end
       end
-      
-      def process_certificate(certificate_file_name, certificate_password)
-        certificate_path = "#{certificate_file_name}.p12"
-      
-        unless File.extname(certificate_file_name) == '.p12'
-          puts "The file is not a .p12 file. Operation aborted."
+
+      def process_certificate(certificate_path)
+        unless File.extname(certificate_path) == '.p12'
+          puts 'The file is not a .p12 file. Operation aborted.'
           return
         end
-      
-        if !legacy_certificate_check(certificate_path, certificate_password)
-          puts "The provided certificate does not appear to be a legacy certificate. Operation aborted."
+
+        unless legacy_certificate_check(certificate_path)
+          puts "The provided certificate does not appear to be a legacy certificate. Operation aborted. #{certificate_path}"
           return
         end
-      
+
         Dir.mktmpdir do |dir|
           temp_certificate_p12 = File.join(dir, 'temp_certificate.p12')
           FileUtils.cp(certificate_path, temp_certificate_p12)
-      
+
           temp_certificate_pem = File.join(dir, 'temp_certificate.pem')
-          system "openssl pkcs12 -legacy -in #{temp_certificate_p12} -out #{temp_certificate_pem} -nodes -passin pass:#{certificate_password}"
-      
+          system "openssl pkcs12 -legacy -in #{temp_certificate_p12} -nodes -out #{temp_certificate_pem} -passin pass:"
+
           temp_certificate_key = File.join(dir, 'temp_certificate.key')
-          system "openssl pkcs12 -legacy -in #{temp_certificate_p12} -nocerts -out #{temp_certificate_key} -passin pass:#{certificate_password} -passout pass:'#{certificate_password}'"
-      
-          new_certificate_p12 = "#{certificate_file_name}_new.p12"
-          system "openssl pkcs12 -export -out #{new_certificate_p12} -inkey #{temp_certificate_key} -in #{temp_certificate_pem} -passin pass:#{certificate_password} -passout pass:#{certificate_password}"
+          system "openssl pkcs12 -legacy -in #{temp_certificate_p12} -nocerts -out #{temp_certificate_key} -passout pass:1234 -passin pass:"
+
+          new_certificate_p12 = "#{File.basename(certificate_path, '.p12')}_new.p12"
+          command = "openssl pkcs12 -export -out #{new_certificate_p12} -inkey #{temp_certificate_key} -in #{temp_certificate_pem} -passin pass:1234 -passout pass: -legacy"
+          puts command
+          system command
+
+          FileUtils.cp(new_certificate_p12, certificate_path)
         end
-        puts "Done! Your certificate is now ready and named #{new_certificate_p12}."
       end
-      
     end
   end
 end
