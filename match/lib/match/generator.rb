@@ -80,7 +80,9 @@ module Match
         output_path: File.join(working_directory, "profiles", prov_type.to_s),
         username: params[:username],
         force: force,
-        cert_id: certificate_id,
+        # Only use serial number because 
+        # the cert name is not a reliable id unlike the serial number
+        # cert_id: certificate_id,
         cert_serial_number: certificate_serial_number,
         provisioning_name: profile_name,
         ignore_profiles_with_different_name: true,
