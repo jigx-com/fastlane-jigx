@@ -359,7 +359,32 @@ module Sigh
       end
 
       return certificates if Sigh.config[:development] # development profiles support multiple certificates
-      return [certificates.first]
+      # Ask the user to select a certificate if there are multiple
+      return certificates if certificates.count <= 1
+      
+      # If there are multiple certificates, and we're not in development mode
+      # we need to ask the user to select the one they want
+      
+      options = certificates.map do |c|
+        {
+          c.id => "#{c.display_name} (#{c.id}) - Expires #{Time.parse(c.expiration_date).strftime('%Y-%m-%d')}"
+        }
+      end.reduce(:merge)
+
+      env_cert_id = ENV["SIGH_CERT_ID"]
+      if env_cert_id
+        selected_certificate = certificates.find { |c| c.id == env_cert_id }
+        if selected_certificate
+          UI.important("Found certificate in environment variable SIGH_CERT_ID: #{selected_certificate.display_name} (#{selected_certificate.id})")
+          return [selected_certificate] 
+        end
+        UI.error("Could not find certificate with id '#{env_cert_id}'")
+      end
+
+      selected = UI.select("Which certificate do you want to use?", options.keys)
+      selected_certificate = certificates.find { |c| c.id == selected }
+
+      return [selected_certificate]
     end
 
     # Downloads and stores the provisioning profile
