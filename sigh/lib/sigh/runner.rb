@@ -359,11 +359,12 @@ module Sigh
       end
 
       return certificates if Sigh.config[:development] # development profiles support multiple certificates
-      # Ask the user to select a certificate if there are multiple
+
       return certificates if certificates.count <= 1
-      
-      # If there are multiple certificates, and we're not in development mode
-      # we need to ask the user to select the one they want
+
+      return [certificates.first] unless UI.interactive?
+
+      # Ask the user to select a certificate if there are multiple
       
       options = certificates.map do |c|
         {
