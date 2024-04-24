@@ -73,7 +73,13 @@ module Match
         aws_secrets_manager_access_key: params[:aws_secrets_manager_access_key],
         aws_secrets_manager_secret_access_key: params[:aws_secrets_manager_secret_access_key],
         skip_spaceship_ensure: params[:skip_certificate_matching],
-        bundle_id_filter: params[:app_identifier]
+        bundle_id_filter: params[:app_identifier],
+        rest_api_storage_download_proc: params[:rest_api_storage_download_proc],
+        rest_api_storage_upload_proc: params[:rest_api_storage_upload_proc],
+        rest_api_storage_delete_proc: params[:rest_api_storage_delete_proc],
+        rest_api_storage_list_proc: params[:rest_api_storage_list_proc],
+        rest_api_storage_auth_params: params[:rest_api_storage_auth_params],
+        rest_api_storage_path_separator: params[:rest_api_storage_path_separator]
       })
       storage.download
 

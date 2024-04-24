@@ -4,6 +4,7 @@ require_relative 'storage/google_cloud_storage'
 require_relative 'storage/s3_storage'
 require_relative 'storage/gitlab_secure_files'
 require_relative 'storage/aws_secrets_manager_storage'
+require_relative 'storage/rest_api_storage'
 
 module Match
   module Storage
@@ -24,7 +25,10 @@ module Match
           },
           "aws_secrets_manager" => lambda { |params|
             return Storage::AWSSecretsManagerStorage.configure(params)
-          }
+          },
+          "rest_api_storage" => lambda { |params|
+            return Storage::RestAPIStorage.configure(params)
+          },
         }
       end
 

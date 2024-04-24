@@ -24,7 +24,10 @@ module Match
           },
           "aws_secrets_manager" => lambda { |params|
             return nil
-          }
+          },
+          "rest_api_storage" => lambda { |params|
+            return nil
+          },
         }
       end
 
