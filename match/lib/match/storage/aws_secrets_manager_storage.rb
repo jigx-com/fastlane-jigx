@@ -293,6 +293,7 @@ module Match
           return file_name
         end
 
+        file_name.gsub(@path_separator, "___")
         file_name.gsub(File::SEPARATOR, @path_separator)
       end
 
@@ -303,6 +304,7 @@ module Match
         end
 
         file_name.gsub(@path_separator, File::SEPARATOR)
+        file_name.gsub("___", @path_separator)
       end
 
       def currently_used_team_id
