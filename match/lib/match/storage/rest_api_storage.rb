@@ -112,6 +112,10 @@ module Match
       end
 
       def upload_files(files_to_upload: [], custom_message: nil)
+        files_to_upload.each do |file_name|
+          ensure_file_name_encodable(sanitize_file_name(file_name))
+        end
+        
         files_to_upload.each do |file_path|
           file_id = rest_api_file_id(file_path)
           binary_content = File.read(file_path)
