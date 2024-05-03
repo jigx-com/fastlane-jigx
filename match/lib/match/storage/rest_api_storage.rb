@@ -112,6 +112,10 @@ module Match
       end
 
       def upload_files(files_to_upload: [], custom_message: nil)
+        files_to_upload.each do |file_name|
+          ensure_file_name_encodable(sanitize_file_name(file_name))
+        end
+        
         files_to_upload.each do |file_path|
           file_id = rest_api_file_id(file_path)
           binary_content = File.read(file_path)
@@ -168,12 +172,12 @@ module Match
 
       def encode_file_name(file_name)
         # Use the path separator to transform the file system path into a custom object path
-        @rest_api_storage_path_separator ? file_name.gsub(@rest_api_storage_path_separator, "___").gsub(File::SEPARATOR, @rest_api_storage_path_separator) : file_name
+        @rest_api_storage_path_separator ? file_name.gsub(File::SEPARATOR, @rest_api_storage_path_separator) : file_name
       end
 
       def decode_file_name(file_name)
         # Use the path separator to transform the custom object path back into a file system path
-        @rest_api_storage_path_separator ? file_name.file_name.gsub(@rest_api_storage_path_separator, File::SEPARATOR).gsub("___", @rest_api_storage_path_separator) : file_name
+        @rest_api_storage_path_separator ? file_name.gsub(@rest_api_storage_path_separator, File::SEPARATOR) : file_name
       end
 
       def currently_used_team_id
