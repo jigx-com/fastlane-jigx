@@ -28,6 +28,11 @@ module Match
       def self.configure(params)
         UI.important("You are using a custom REST API for your storage.")
 
+        UI.user_error!("You must provide a `rest_api_storage_download_proc` block") unless params[:rest_api_storage_download_proc]
+        UI.user_error!("You must provide a `rest_api_storage_upload_proc` block") unless params[:rest_api_storage_upload_proc]
+        UI.user_error!("You must provide a `rest_api_storage_delete_proc` block") unless params[:rest_api_storage_delete_proc]
+        UI.user_error!("You must provide a `rest_api_storage_list_proc` block") unless params[:rest_api_storage_list_proc]
+
         return self.new(
           rest_api_storage_download_proc: params[:rest_api_storage_download_proc],
           rest_api_storage_upload_proc: params[:rest_api_storage_upload_proc],
