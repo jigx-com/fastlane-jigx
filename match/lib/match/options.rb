@@ -294,8 +294,9 @@ module Match
                                      description: "Rest API Storage authentication parameters",
                                      optional: true),
         FastlaneCore::ConfigItem.new(key: :rest_api_storage_path_separator,
-                                     description: "Rest API Storage path separator (Default '/')",
-                                     default_value: '/'),
+                                     optional: true,
+                                     type: String,
+                                     description: "Rest API Storage path separator"),
 
         # Keychain
         FastlaneCore::ConfigItem.new(key: :keychain_name,
